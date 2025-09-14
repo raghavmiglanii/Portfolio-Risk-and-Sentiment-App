@@ -1,0 +1,10 @@
+streamlit>=1.28.0
+streamlit-option-menu>=0.3.6
+yfinance>=0.2.22
+plotly>=5.17.0
+pandas>=2.1.0
+numpy>=1.24.0
+pandas-ta>=0.3.14b0
+transformers>=4.35.0
+torch>=2.0.0
+requests>=2.31.0

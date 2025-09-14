@@ -1,0 +1,163 @@
+# 📈 Quantitative Risk & Analysis Dashboard
+
+A comprehensive stock analysis and portfolio management dashboard for the Indian stock market, built with Streamlit and powered by AI-driven insights.
+
+## ✨ Features
+
+- **Portfolio Management**: Add, remove, and track your stock holdings
+- **Risk Analysis**: Calculate Value at Risk (VaR) using historical simulation
+- **Technical Analysis**: RSI, MACD, EMA crossovers, Bollinger Bands, ADX, and Supertrend
+- **Fundamental Analysis**: P/E, PEG, P/B ratios, profit margins, ROE, and debt analysis
+- **AI-Powered News Sentiment**: Uses FinBERT to analyze news sentiment
+- **Market Screening**: Scan NIFTY 200 stocks for opportunities
+- **Real-time Data**: Live market data and news updates
+
+## 🚀 Deployment on Streamlit Community Cloud
+
+### Prerequisites
+
+1. A GitHub account
+2. A NewsAPI key from [NewsAPI.org](https://newsapi.org/register) (free tier available)
+
+### Step 1: Fork/Clone Repository
+
+1. Create a new repository on GitHub
+2. Upload all the files from this project to your repository
+
+### Step 2: Configure NewsAPI Key
+
+1. Sign up for a free API key at [NewsAPI.org](https://newsapi.org/register)
+2. In your `config/constants.py` file, replace `"YOUR_NEWS_API_KEY_HERE"` with your actual API key
+
+### Step 3: Deploy on Streamlit Cloud
+
+1. Go to [share.streamlit.io](https://share.streamlit.io)
+2. Sign in with your GitHub account
+3. Click "New app"
+4. Select your repository
+5. Set the main file path to `app.py`
+6. Click "Deploy"
+
+The app will automatically install all dependencies from `requirements.txt` and start running.
+
+## 📁 Project Structure
+
+```
+quantitative-risk-dashboard/
+├── app.py                     # Main Streamlit application
+├── requirements.txt           # Python dependencies
+├── README.md                 # This file
+├── .streamlit/
+│   └── config.toml           # Streamlit configuration
+├── config/
+│   ├── __init__.py
+│   └── constants.py          # Configuration constants
+└── utils/
+    ├── __init__.py
+    ├── analysis.py           # Technical and fundamental analysis
+    ├── data_loader.py        # Stock data loading utilities
+    ├── market_data.py        # Market data fetching
+    ├── news_service.py       # News fetching and sentiment analysis
+    ├── portfolio_manager.py   # Portfolio management utilities
+    └── ui_helpers.py         # UI styling and helpers
+```
+
+## 🔧 Local Development
+
+1. **Clone the repository:**
+   ```bash
+   git clone <your-repo-url>
+   cd quantitative-risk-dashboard
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Set up your NewsAPI key:**
+   - Edit `config/constants.py`
+   - Replace `NEWS_API_KEY = "YOUR_NEWS_API_KEY_HERE"` with your actual key
+
+4. **Run the application:**
+   ```bash
+   streamlit run app.py
+   ```
+
+## 📊 How to Use
+
+### Dashboard
+- View your portfolio's total value, VaR, and daily P&L
+- Configure risk parameters (confidence level, historical lookback period)
+
+### Portfolio Management
+- Add/remove stocks using the search interface
+- View current holdings with live prices and daily changes
+- Read portfolio-specific and general market news
+
+### Stock Analysis
+- Select any stock for comprehensive technical and fundamental analysis
+- Get AI-powered buy/sell/hold recommendations
+- Batch analyze all stocks in your portfolio
+
+### Market Screening
+- Scan NIFTY 200 stocks for potential opportunities
+- Get ranked lists of potential risers and decliners
+
+## ⚠️ Important Disclaimers
+
+- This tool is for **educational purposes only**
+- **Not financial advice** - always consult with qualified financial advisors
+- Past performance does not guarantee future results
+- Market data may have delays or inaccuracies
+
+## 🛠️ Technical Details
+
+### Data Sources
+- **Stock Data**: Yahoo Finance (via yfinance library)
+- **News**: NewsAPI.org
+- **AI Models**: FinBERT for sentiment analysis
+
+### Key Libraries
+- **Streamlit**: Web interface
+- **yfinance**: Market data
+- **pandas-ta**: Technical analysis indicators
+- **transformers**: AI sentiment analysis
+- **plotly**: Interactive charts
+
+### Performance Considerations
+- Market data is cached for 5 minutes
+- News data is cached for 30 minutes
+- Analysis results are cached for 10-60 minutes depending on complexity
+
+## 🔄 Updates and Maintenance
+
+The application automatically updates market data, but you may need to:
+- Renew your NewsAPI key periodically
+- Update the stock list in `data_loader.py` if new companies are added to indices
+- Monitor for any breaking changes in the yfinance library
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **"Could not fetch market data"**
+   - Check your internet connection
+   - Yahoo Finance may be temporarily unavailable
+   - Try refreshing the page
+
+2. **"Please add your NewsAPI key"**
+   - Ensure you've replaced the placeholder in `config/constants.py`
+   - Verify your API key is active at newsapi.org
+
+3. **Analysis shows "Not enough historical data"**
+   - Some stocks may not have sufficient trading history
+   - Try with more established companies
+
+## 📝 License
+
+This project is for educational purposes. Please ensure compliance with data provider terms of service.
+
+## 🤝 Contributing
+
+Feel free to submit issues, feature requests, or pull requests to improve the application.
