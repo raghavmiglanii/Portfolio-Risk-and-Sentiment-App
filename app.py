@@ -337,87 +337,117 @@ elif selected == "Analysis":
             '''))
 
     st.markdown("---")
-    st.subheader("📊 Portfolio Batch Analysis")
-    if not st.session_state.portfolio:
-        st.warning("Your portfolio is empty. Add stocks using the Portfolio page to enable this feature.")
-    elif st.button("🚀 Analyze All Portfolio Stocks", use_container_width=True, type="primary"):
-        results = []
-        tickers_to_analyze = list(st.session_state.portfolio.keys())
-        progress_bar = st.progress(0, text="Downloading batch historical data...")
+st.subheader("📊 Portfolio Batch Analysis")
+if not st.session_state.portfolio:
+    st.warning("Your portfolio is empty. Add stocks using the Portfolio page to enable this feature.")
+elif st.button("🚀 Analyze All Portfolio Stocks", use_container_width=True, type="primary"):
+    results = []
+    tickers_to_analyze = list(st.session_state.portfolio.keys())
+    progress_bar = st.progress(0, text="Downloading batch historical data...")
 
-        all_hist_data = yf.download(
-            tickers_to_analyze,
-            period="1y",
-            auto_adjust=True,
-            progress=False,
-            group_by='ticker'
-        )
+    all_hist_data = yf.download(
+        tickers_to_analyze,
+        period="1y",
+        auto_adjust=True,
+        progress=False,
+        group_by='ticker'
+    )
 
-        total_stocks = len(tickers_to_analyze)
-        for i, ticker in enumerate(tickers_to_analyze):
-            progress_bar.progress((i + 1) / total_stocks, text=f"Analyzing {ticker.replace('.NS','')}...")
-            company_name = ticker_list.loc[ticker, 'Security Name'] if ticker in ticker_list.index else ticker
-            
-            tech_score, _, _ = get_technical_analysis(ticker)
-            fund_score, _, _ = get_fundamental_analysis(ticker)
-            _, sentiment, _ = get_news_and_sentiment(ticker, company_name)
-            signal = generate_signal(tech_score, fund_score, sentiment)
-            
-            yoy_change = 0.0
-            try:
-                hist_data = all_hist_data[ticker]
-                if not hist_data.empty and len(hist_data) > 1:
-                    start_price = hist_data['Close'].iloc[0]
-                    latest_price = hist_data['Close'].iloc[-1]
-                    if start_price > 0:
-                        yoy_change = ((latest_price - start_price) / start_price) * 100
-            except (KeyError, IndexError):
-                yoy_change = 0.0
-
-            results.append({
-                'Ticker': ticker.replace('.NS',''),
-                'Signal': signal,
-                'Tech Score': tech_score,
-                'Fund Score': fund_score,
-                '1Y Change %': yoy_change 
-            })
-        progress_bar.empty()
-        st.session_state['batch_results'] = pd.DataFrame(results)
-
-    if 'batch_results' in st.session_state:
-        results_df = st.session_state['batch_results']
+    total_stocks = len(tickers_to_analyze)
+    for i, ticker in enumerate(tickers_to_analyze):
+        progress_bar.progress((i + 1) / total_stocks, text=f"Analyzing {ticker.replace('.NS','')}...")
+        company_name = ticker_list.loc[ticker, 'Security Name'] if ticker in ticker_list.index else ticker
         
-        cols = st.columns((1, 1, 1, 1, 1))
-        headers = ["Ticker", "Overall Signal", "Technical Score", "Fundamental Score", "1Y Change %"]
-        for col, header in zip(cols, headers):
-            col.markdown(f"**{header}**")
-            
-        for _, row in results_df.iterrows():
-            cols = st.columns((1, 1, 1, 1, 1))
-            cols[0].write(row['Ticker'])
-            cols[1].write(row['Signal'])
-            
-            tech_score = row['Tech Score']
-            tech_color = "#3FB950" if tech_score > 0 else "#F85149" if tech_score < 0 else "#8B949E"
-            cols[2].markdown(f'<p style="color:{tech_color};">{tech_score}</p>', unsafe_allow_html=True)
-            
-            fund_score = row['Fund Score']
-            fund_color = "#3FB950" if fund_score > 0 else "#F85149" if fund_score < 0 else "#8B949E"
-            cols[3].markdown(f'<p style="color:{fund_color};">{fund_score}</p>', unsafe_allow_html=True)
-            
-            yoy_change = row['1Y Change %']
-            yoy_color = "#3FB950" if yoy_change > 0 else "#F85149" if yoy_change < 0 else "#8B949E"
-            cols[4].markdown(f'<p style="color:{yoy_color};">{yoy_change:+.2f}%</p>', unsafe_allow_html=True)
+        tech_score, _, _ = get_technical_analysis(ticker)
+        fund_score, _, _ = get_fundamental_analysis(ticker)
+        _, sentiment, _ = get_news_and_sentiment(ticker, company_name)
+        signal = generate_signal(tech_score, fund_score, sentiment)
+        
+        yoy_change = 0.0
+        try:
+            hist_data = all_hist_data[ticker]
+            if not hist_data.empty and len(hist_data) > 1:
+                start_price = hist_data['Close'].iloc[0]
+                latest_price = hist_data['Close'].iloc[-1]
+                if start_price > 0:
+                    yoy_change = ((latest_price - start_price) / start_price) * 100
+        except (KeyError, IndexError):
+            yoy_change = 0.0
 
-        with st.expander("How to Read This Analysis 🤔"):
-            st.markdown(textwrap.dedent('''
-            This table gives you a quick summary of each stock in your portfolio:
+        results.append({
+            'Ticker': ticker.replace('.NS',''),
+            'Signal': signal,
+            'Tech Score': tech_score,
+            'Fund Score': fund_score,
+            '1Y Change %': f"{yoy_change:+.2f}%"
+        })
+    progress_bar.empty()
+    st.session_state['batch_results'] = pd.DataFrame(results)
 
-            - **Technical Score**: Looks at chart patterns. A positive score is green, negative is red. Calculated from 6 indicators, so the score is between **-6 and +6**.
-            - **Fundamental Score**: Checks the company's financial health. A positive score is green, negative is red. Calculated from 6 metrics, so the score is between **-6 and +6**.
-            - **1Y Change %**: Shows the stock's percentage price change over the last year.
-            - **Overall Signal**: The final recommendation based on all of the above.
-            '''))
+if 'batch_results' in st.session_state:
+    results_df = st.session_state['batch_results'].copy()
+    
+    # Apply styling function for better mobile display
+    def style_dataframe(df):
+        def color_score(val):
+            """Color code the scores"""
+            try:
+                if isinstance(val, str) and '%' in val:
+                    # Handle percentage values
+                    num_val = float(val.replace('%', '').replace('+', ''))
+                    color = '#28a745' if num_val > 0 else '#dc3545' if num_val < 0 else '#6c757d'
+                elif isinstance(val, (int, float)):
+                    # Handle numeric scores
+                    color = '#28a745' if val > 0 else '#dc3545' if val < 0 else '#6c757d'
+                else:
+                    return ''
+                return f'color: {color}; font-weight: bold'
+            except:
+                return ''
+        
+        def color_signal(val):
+            """Color code the signals"""
+            if 'STRONG BUY' in str(val):
+                return 'background-color: #28a745; color: white; font-weight: bold; padding: 4px; border-radius: 4px'
+            elif 'BUY' in str(val):
+                return 'background-color: #17a2b8; color: white; font-weight: bold; padding: 4px; border-radius: 4px'
+            elif 'HOLD' in str(val):
+                return 'background-color: #ffc107; color: black; font-weight: bold; padding: 4px; border-radius: 4px'
+            elif 'SELL' in str(val):
+                return 'background-color: #dc3545; color: white; font-weight: bold; padding: 4px; border-radius: 4px'
+            else:
+                return 'background-color: #6c757d; color: white; font-weight: bold; padding: 4px; border-radius: 4px'
+        
+        # Apply styles
+        styled_df = df.style.applymap(color_score, subset=['Tech Score', 'Fund Score', '1Y Change %'])
+        styled_df = styled_df.applymap(color_signal, subset=['Signal'])
+        
+        return styled_df
+
+    # Display the styled dataframe
+    st.dataframe(
+        style_dataframe(results_df),
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "Ticker": st.column_config.TextColumn("📈 Ticker", width="small"),
+            "Signal": st.column_config.TextColumn("🎯 Overall Signal", width="medium"),
+            "Tech Score": st.column_config.TextColumn("📊 Technical Score", width="small"),
+            "Fund Score": st.column_config.TextColumn("💰 Fundamental Score", width="small"),
+            "1Y Change %": st.column_config.TextColumn("📈 1Y Change %", width="medium")
+        }
+    )
+
+    with st.expander("How to Read This Analysis 🤔"):
+        st.markdown(textwrap.dedent('''
+        This table gives you a quick summary of each stock in your portfolio:
+
+        - **Technical Score**: Looks at chart patterns. A positive score is green, negative is red. Calculated from 6 indicators, so the score is between **-6 and +6**.
+        - **Fundamental Score**: Checks the company's financial health. A positive score is green, negative is red. Calculated from 6 metrics, so the score is between **-6 and +6**.
+        - **1Y Change %**: Shows the stock's percentage price change over the last year.
+        - **Overall Signal**: The final recommendation based on all of the above.
+        📱 **Mobile Tip**: You can scroll horizontally on the table if needed, and tap on rows for better visibility.
+        '''))
 
 # Suggestions Page
 elif selected == "Suggestions":
