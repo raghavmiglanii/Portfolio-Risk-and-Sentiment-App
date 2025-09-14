@@ -408,15 +408,15 @@ if 'batch_results' in st.session_state:
         def color_signal(val):
             """Color code the signals"""
             if 'STRONG BUY' in str(val):
-                return 'background-color: #28a745; color: white; font-weight: bold; padding: 4px; border-radius: 4px'
+                return 'color: white; font-weight: bold; padding: 4px; border-radius: 4px'
             elif 'BUY' in str(val):
-                return 'background-color: #17a2b8; color: white; font-weight: bold; padding: 4px; border-radius: 4px'
+                return 'color: white; font-weight: bold; padding: 4px; border-radius: 4px'
             elif 'HOLD' in str(val):
-                return 'background-color: #ffc107; color: black; font-weight: bold; padding: 4px; border-radius: 4px'
+                return 'color: white; font-weight: bold; padding: 4px; border-radius: 4px'
             elif 'SELL' in str(val):
-                return 'background-color: #dc3545; color: white; font-weight: bold; padding: 4px; border-radius: 4px'
+                return 'color: white; font-weight: bold; padding: 4px; border-radius: 4px'
             else:
-                return 'background-color: #6c757d; color: white; font-weight: bold; padding: 4px; border-radius: 4px'
+                return 'color: white; font-weight: bold; padding: 4px; border-radius: 4px'
         
         # Apply styles
         styled_df = df.style.applymap(color_score, subset=['Tech Score', 'Fund Score', '1Y Change %'])
